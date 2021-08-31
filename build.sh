@@ -1,1 +1,1 @@
-docker build -t somefive/hello-world:edge -f Dockerfile .
+docker build -t somefive/hello-world:kubevela -f Dockerfile .

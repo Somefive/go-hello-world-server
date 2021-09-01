@@ -1,3 +1,12 @@
+void setBuildStatus(String message, String state) {
+  step([
+      $class: "GitHubCommitStatusSetter",
+      reposSource: [$class: "ManuallyEnteredRepositorySource", url: "https://github.com/Somefive/go-hello-world-server"],
+      contextSource: [$class: "ManuallyEnteredCommitContextSource", context: "ci/jenkins/build-status"],
+      errorHandlers: [[$class: "ChangingBuildStatusErrorHandler", result: "UNSTABLE"]],
+      statusResultSource: [ $class: "ConditionalStatusResultSource", results: [[$class: "AnyBuildResult", message: message, state: state]] ]
+  ]);
+}
 pipeline {
     agent {
         docker { image 'golang:1.13-rc-alpine3.10' }
@@ -5,6 +14,7 @@ pipeline {
     stages {
         stage('Prepare') {
             steps {
+                setBuildStatus("Test running", "PENDING");
                 script {
                     def checkout = git branch: 'kubevela-demo-dev', url: 'https://github.com/Somefive/go-hello-world-server.git'
                     env.GIT_COMMIT = checkout.GIT_COMMIT
@@ -17,6 +27,14 @@ pipeline {
             steps {
                 sh 'CGO_ENABLED=0 GOCACHE=$(pwd)/.cache go test *.go'
             }
+        }
+    }
+    post {
+        success {
+            setBuildStatus("Test success", "SUCCESS");
+        }
+        failure {
+            setBuildStatus("Test failed", "FAILURE");
         }
     }
 }

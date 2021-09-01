@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-const VERSION = "0.1.3-v1beta2"
+const VERSION = "alpha-0.1.3-v1beta2"
 
 func main() {
 	port := os.Getenv("PORT")

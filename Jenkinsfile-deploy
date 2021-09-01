@@ -1,0 +1,57 @@
+node {
+    stage('Prepare') {
+        def checkout = git branch: 'kubevela-demo', url: 'https://github.com/Somefive/go-hello-world-server.git'
+        env.GIT_COMMIT = checkout.GIT_COMMIT
+        echo "env.GIT_COMMIT=${env.GIT_COMMIT}"
+    }
+    stage('Build') {
+        docker.withRegistry("https://registry.hub.docker.com", "85e9f90d-c772-4e46-ba0f-dc2e531576ab") {
+            def customImage = docker.build("somefive/hello-world:kubevela-demo")
+            customImage.push()
+        }
+    }
+    stage('Deploy') {
+        def app = """
+            {
+              "components": [
+                {
+                  "name": "simple-hello-world-server",
+                  "type": "webservice",
+                  "properties": {
+                    "image": "somefive/hello-world:kubevela-demo",
+                    "imagePullPolicy": "Always",
+                    "port": 80
+                  },
+                  "traits": [
+                    {
+                       "type": "scaler",
+                       "properties": {
+                         "replicas": 3
+                       }
+                    },
+                    {
+                       "type": "labels",
+                       "properties": {
+                         "jenkins-build-commit": "${env.GIT_COMMIT}"
+                       }
+                    },
+                    {
+                      "type": "ingress",
+                      "properties": {
+                        "domain": "hello-world.cf7c0ed25b151437ebe1ef58efc29bca4.us-west-1.alicontainer.com",
+                        "http": {
+                          "/": 80
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+        """
+        echo "app: ${app}"
+        def response = httpRequest acceptType: 'APPLICATION_JSON', contentType: 'APPLICATION_JSON', httpMode: 'POST', requestBody: app, url: "http://47.88.24.19/v1/namespaces/kubevela-demo-app/applications/hello-world"
+        println('Status: '+response.status)
+        println('Response: '+response.content)
+    }
+}

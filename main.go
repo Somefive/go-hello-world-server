@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-const VERSION = "0.1.3"
+const VERSION = "0.1.3-v1beta3"
 
 func main() {
 	port := os.Getenv("PORT")
@@ -23,10 +23,10 @@ func main() {
 		if ok && len(envs) > 0 {
 			key = envs[0]
 		}
-		fmt.Fprintf(w, "Hello %s\nVersion: %s\n", os.Getenv(key), VERSION)
+		_, _ = fmt.Fprintf(w, "Hello %s\nVersion: %s\n", os.Getenv(key), VERSION)
 	})
 	http.HandleFunc("/"+username, func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Welcome\n")
+		_, _ = fmt.Fprintf(w, "Welcome\n")
 	})
 	if err := http.ListenAndServe(":"+port, nil); err != nil {
 		println(err.Error())

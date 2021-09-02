@@ -2,7 +2,7 @@ void setBuildStatus(String message, String state) {
   step([
       $class: "GitHubCommitStatusSetter",
       reposSource: [$class: "ManuallyEnteredRepositorySource", url: "https://github.com/Somefive/go-hello-world-server"],
-      contextSource: [$class: "ManuallyEnteredCommitContextSource", context: "ci/jenkins/build-status"],
+      contextSource: [$class: "ManuallyEnteredCommitContextSource", context: "ci/jenkins/test-status"],
       errorHandlers: [[$class: "ChangingBuildStatusErrorHandler", result: "UNSTABLE"]],
       statusResultSource: [ $class: "ConditionalStatusResultSource", results: [[$class: "AnyBuildResult", message: message, state: state]] ]
   ]);
@@ -14,8 +14,9 @@ pipeline {
     stages {
         stage('Prepare') {
             steps {
+                sh 'echo ${env}'
                 script {
-                    def checkout = git branch: 'kubevela-demo', url: 'https://github.com/Somefive/go-hello-world-server.git'
+                    def checkout = git branch: 'kubevela-demo-dev', url: 'https://github.com/Somefive/go-hello-world-server.git'
                     env.GIT_COMMIT = checkout.GIT_COMMIT
                     env.GIT_BRANCH = checkout.GIT_BRANCH
                     echo "env.GIT_BRANCH=${env.GIT_BRANCH},env.GIT_COMMIT=${env.GIT_COMMIT}"

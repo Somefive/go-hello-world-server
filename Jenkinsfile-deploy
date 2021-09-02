@@ -33,8 +33,13 @@ pipeline {
         }
         stage('Deploy') {
             steps {
+                sh 'wget -q "https://github.com/mikefarah/yq/releases/download/v4.12.1/yq_linux_amd64"'
+                sh 'chmod +x yq_linux_amd64'
                 script {
-                    def app = sh "cat app.json | sed -e 's/GIT_COMMIT/$GIT_COMMIT/g'"
+                    def app = sh (
+                        script: "./yq_linux_amd64 eval -o=json '.spec' app.yaml | sed -e 's/GIT_COMMIT/$GIT_COMMIT/g'",
+                        returnStdout: true
+                    )
                     echo "app: ${app}"
                     def response = httpRequest acceptType: 'APPLICATION_JSON', contentType: 'APPLICATION_JSON', httpMode: 'POST', requestBody: app, url: "http://47.88.24.19/v1/namespaces/kubevela-demo-app/applications/hello-world"
                     println('Status: '+response.status)

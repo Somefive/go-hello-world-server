@@ -15,7 +15,7 @@ pipeline {
         stage('Prepare') {
             steps {
                 script {
-                    def checkout = git branch: 'kubevela-demo-dev', url: 'https://github.com/Somefive/go-hello-world-server.git'
+                    def checkout = git branch: 'kubevela-demo', url: 'https://github.com/Somefive/go-hello-world-server.git'
                     env.GIT_COMMIT = checkout.GIT_COMMIT
                     env.GIT_BRANCH = checkout.GIT_BRANCH
                     echo "env.GIT_BRANCH=${env.GIT_BRANCH},env.GIT_COMMIT=${env.GIT_COMMIT}"
